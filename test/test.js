@@ -54,7 +54,7 @@ describe('OpeningHours - Tests', function(){
     })     
   }),
   describe('Handling response internal objects', function(){
-    var responseObj = openinghours.getBusinessOpeningHours('Mo-Fr 8:30-12:30,13:30-17:30', 10, 'it');  
+    var responseObj = openinghours.getBusinessOpeningHours('Mo-Su 8:30-12:30,13:30-17:30', 10, 'it');  
     it ('today.intervals[0].open must be String', function() {
         assert.equal(typeof responseObj.today.intervals[0].open, 'string');
     }),
