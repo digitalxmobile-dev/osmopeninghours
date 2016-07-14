@@ -39,7 +39,7 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
             businessNextChange = nextchange.getHours() + ":" + nextchange.getMinutes();
             //businessNextChange = 'E '  + (state ? 'chiuderemo' : 'apriremo') + ' alle ' + nextchange.getHours() + ":" + nextchange.getMinutes();
         }
-        openingHoursBusiness.nextChangeChange = businessNextChange;
+        openingHoursBusiness.nextChange = businessNextChange;
 
         openingHoursBusiness.nextChangeHours = businessNextChangeHoursMinutes(nextchange);
 
@@ -100,6 +100,7 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
         openingHoursBusiness.today = today;
         openingHoursBusiness.tomorrow = tomorrow;
 
+		return openingHoursBusiness;
 
     }else {
         return null;
