@@ -21,3 +21,6 @@ Intervals are based on actual hour, so in the morning before business opens it c
 
 #Credits
 This library uses: https://github.com/opening-hours/opening_hours.js 
+
+#Contacts 
+DigitalX : mobile@digitalx.it
