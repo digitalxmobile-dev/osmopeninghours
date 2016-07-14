@@ -73,5 +73,11 @@ describe('OpeningHours - Tests', function(){
     it ('tomorrow.intervalsString[0] must be String', function() {
         assert.equal(typeof responseObj.tomorrow.intervalsString[0], 'string');
     })        
-  })            
+  }),
+  describe('Checking all days close',function(){
+    var responseObj = openinghours.getBusinessOpeningHours('Mo-Su off', 10, 'it');  
+    it ('today.intervals[0].open must be String', function() {
+        assert.equal(typeof responseObj.today.intervals, 'undefined');
+    })
+  })      
 });  
