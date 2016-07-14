@@ -1,0 +1,49 @@
+{
+  "is_now_open": true,
+  "nextChange": "12:30",
+  "nextChangeHours": "3:28",
+  "today": {
+    "is_open": true,
+    "intervals": [
+      {
+        "open": "09:10",
+        "close": "12:20"
+      },
+      {
+        "open": "13:30",
+        "close": "15:20"
+      },
+      {
+        "open": "16:00",
+        "close": "17:50"
+      }
+    ],
+    "intervalsString": [
+      "09:10 - 12:20",
+      "13:30 - 15:20",
+      "16:00 - 17:50"
+    ]
+  },
+  "tomorrow": {
+    "is_open": true,
+    "intervals": [
+      {
+        "open": "08:30",
+        "close": "12:20"
+      },
+      {
+        "open": "13:30",
+        "close": "15:20"
+      },
+      {
+        "open": "16:00",
+        "close": "17:50"
+      }
+    ],
+    "intervalsString": [
+      "08:30 - 12:20",
+      "13:30 - 15:20",
+      "16:00 - 17:50"
+    ]
+  }
+}
