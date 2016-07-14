@@ -18,3 +18,6 @@ Intervals array inside "today" and "tomorrow" objects could not be availlable if
 If tomorrow._is_open = true, intervals are always present, it length depends on the amount of rules the OSM starting string has.
 
 Intervals are based on actual hour, so in the morning before business opens it contains all the open-close intervals... 
+
+#Credits
+This library uses: https://github.com/opening-hours/opening_hours.js 
