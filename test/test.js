@@ -31,9 +31,6 @@ describe('OpeningHours - Tests', function(){
     it ('response.nextChange must be a String', function() {
         assert.equal(typeof responseObj.nextChange, 'string');
     }),
-    it ('response.nextChangeHours must be a String', function() {
-        assert.equal(typeof responseObj.nextChangeHours, 'string');
-    }),
     it ('response.today must be a Object', function() {
         assert.equal(typeof responseObj.today, 'object');
     }),
