@@ -1,5 +1,5 @@
 /**
- * ver. 0.1.0 14/07/2016.
+ * ver. 0.2.0 15/07/2016.
  */
 
 var opening_hours = require('opening_hours');
@@ -9,7 +9,7 @@ var opening_hours = require('opening_hours');
  *
  * @param  {String} osmString
  * @param  {int} shippingTime
- * @param  {String} locale
+ * @param {String} locale
  * @return {Object} openingHoursBusiness
  */
 exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
@@ -33,15 +33,33 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
         var businessNextChange;
 
         if (typeof nextchange === 'undefined') {
-            businessNextChange = "mai";
-            //businessNextChange = 'E non ' + (state ? 'chiuderemo' : 'apriremo') + " mai."
+            //businessNextChange = "mai";
+            businessNextChange = 'Non ' + (state ? 'chiude' : 'apre') + " mai."
         } else {
-            businessNextChange = nextchange.getHours() + ":" + nextchange.getMinutes();
-            //businessNextChange = 'E '  + (state ? 'chiuderemo' : 'apriremo') + ' alle ' + nextchange.getHours() + ":" + nextchange.getMinutes();
-        }
-        openingHoursBusiness.nextChange = businessNextChange;
+            //businessNextChange = nextchange.getHours() + ":" + nextchange.getMinutes();
+            var tomorrowDayString = "";
+            var nowDate = new Date();
+            if(nextchange.getDay() == nowDate.getDay()){
+                //Business open or close same day
+                if("it" === locale) {
+                    tomorrowDayString = "oggi";
+                }
+            }else if(nextchange.getDay() > nowDate.getDay() && (nextchange.getDay() - nowDate.getDay() == 1)){
+                //In this case means that next business open is "tomorrow"
+                if("it" === locale){
+                    tomorrowDayString = "domani";
+                }
+            }else {
+                //Search wich day business opens, coz is not tomorrow
+                tomorrowDayString = getCorrectDayName(nextchange.getDay(),locale)
+            }
 
-        openingHoursBusiness.nextChangeHours = businessNextChangeHoursMinutes(nextchange);
+            businessNextChange = (state ? 'chiude ' : 'apre ') + tomorrowDayString + ' alle ' + nextchange.getHours() + ":" + nextchange.getMinutes();
+        }
+
+
+        openingHoursBusiness.nextChange = businessNextChange;//Representing chiude/apre alle hh:mm
+        //openingHoursBusiness.nextChangeHours = businessNextChangeHoursMinutes(nextchange); //Commented for now, future uses
 
         /**
          * Getting today and tomorrow custom objects
@@ -100,7 +118,20 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
         openingHoursBusiness.today = today;
         openingHoursBusiness.tomorrow = tomorrow;
 
-		return openingHoursBusiness;
+        //Added telling user when he will be able to preorder
+        if(!today.is_open && !tomorrow.is_open) {
+            if("it" === locale) {
+			    if(nextchange){
+					openingHoursBusiness.nextPreorder = getCorrectDayName((nextchange.getDay() == 0 ? 6 : nextchange.getDay() -1),"it");
+				}else {
+					if("it" === locale){
+						openingHoursBusiness.nextPreorder = "mai";
+					}
+				}
+            }
+        }
+
+        return openingHoursBusiness;
 
     }else {
         return null;
@@ -238,3 +269,24 @@ function businessNextChangeHoursMinutes (nextChange) {
     //}
 }
 
+/**
+ * Getting current day name given as param from Date().getDay()
+ * @param  {integer} dayNum
+ * @param  {String} locale
+ * @return {String} dayName
+ */
+function getCorrectDayName(dayNum, locale){
+    if("it" === locale){
+        var weekday = new Array(7);
+
+        weekday[0]=  "Domenica";
+        weekday[1] = "Lunedì";
+        weekday[2] = "Martedì";
+        weekday[3] = "Mercoledì";
+        weekday[4] = "Giovedì";
+        weekday[5] = "Venerdì";
+        weekday[6] = "Sabato";
+
+        return weekday[dayNum]
+    }
+}
