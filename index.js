@@ -53,7 +53,7 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
                 if("it" === locale){
                     tomorrowDayString = "domani";
 					//Adding shopping phrases for tomorrow
-					openingHoursBusiness.orderReadyPhrase = 'domani alle ' + nextchange.getHours() + ":" + nextchange.getMinutes();
+					openingHoursBusiness.orderReadyPhrase = 'Da domani alle ' + nextchange.getHours() + ":" + nextchange.getMinutes();
                 }
             }else {
                 //Search wich day business opens, coz is not tomorrow
@@ -62,7 +62,7 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
 				openingHoursBusiness.preorderDay = tomorrowDayString;
 				//Adding shopping phrases for nextday
 				if("it" === locale){
-					openingHoursBusiness.orderReadyPhrase = tomorrowDayString + ' alle ' + nextchange.getHours() + ":" + nextchange.getMinutes();
+					openingHoursBusiness.orderReadyPhrase = 'Da ' + tomorrowDayString + ' alle ' + nextchange.getHours() + ":" + nextchange.getMinutes();
 				}
             }
 
