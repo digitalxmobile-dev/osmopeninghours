@@ -1,5 +1,5 @@
 /**
- * ver. 0.2.0 15/07/2016.
+ * ver. 0.2.0 19/07/2016.
  */
 
 var opening_hours = require('opening_hours');
@@ -17,7 +17,12 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
     //Checking for correct input data 
     if ((typeof osmString === 'string' || osmString instanceof String) && isInt(shippingTime) && (typeof locale === 'string' || locale instanceof String ) && locale.length <=2){
 
-        var oh = new opening_hours(osmString);
+        //Check if we are able to parse the string
+        try {
+            var oh = new opening_hours(osmString);
+        }catch (e){
+            return null;
+        }
 
         var openingHoursBusiness = {};
 
@@ -29,12 +34,12 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
          * Getting when's the business next change, means when it closes or opens next time
          * */
         var nextchange = oh.getNextChange();
-		var correctNextChange = new Date();
-		if(nextchange){
-			correctNextChange.setHours(nextchange.getHours(), formatNumber(nextchange.getMinutes() + shippingTime), nextchange.getSeconds());
-		}
-		
-		
+        var correctNextChange = new Date();
+        if(nextchange){
+            correctNextChange.setHours(nextchange.getHours(), formatNumber(nextchange.getMinutes() + shippingTime), nextchange.getSeconds());
+        }
+
+
         var businessNextChange;
 
         if (typeof nextchange === 'undefined') {
@@ -48,27 +53,27 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
                 //Business open or close same day
                 if("it" === locale) {
                     tomorrowDayString = "oggi";
-					//Adding shopping phrases for today
-					if(!state) {
-						openingHoursBusiness.orderReadyPhrase = 'oggi alle ' + correctNextChange.getHours() + ":" + correctNextChange.getMinutes();
-					}
+                    //Adding shopping phrases for today
+                    if(!state) {
+                        openingHoursBusiness.orderReadyPhrase = 'oggi alle ' + correctNextChange.getHours() + ":" + correctNextChange.getMinutes();
+                    }
                 }
             }else if(correctNextChange.getDay() > nowDate.getDay() && (correctNextChange.getDay() - nowDate.getDay() == 1)){
                 //In this case means that next business open is "tomorrow"
                 if("it" === locale){
                     tomorrowDayString = "domani";
-					//Adding shopping phrases for tomorrow
-					openingHoursBusiness.orderReadyPhrase = 'domani alle ' + correctNextChange.getHours() + ":" + correctNextChange.getMinutes();
+                    //Adding shopping phrases for tomorrow
+                    openingHoursBusiness.orderReadyPhrase = 'domani alle ' + correctNextChange.getHours() + ":" + correctNextChange.getMinutes();
                 }
             }else {
                 //Search wich day business opens, coz is not tomorrow
                 tomorrowDayString = getCorrectDayName(correctNextChange.getDay(),locale);
-				//Adding in a custom property of returning obj, with the next open day today and tomorrow is closed
-				openingHoursBusiness.preorderDay = tomorrowDayString;
-				//Adding shopping phrases for nextday
-				if("it" === locale){
-					openingHoursBusiness.orderReadyPhrase = tomorrowDayString + ' alle ' + correctNextChange.getHours() + ":" + correctNextChange.getMinutes();
-				}
+                //Adding in a custom property of returning obj, with the next open day today and tomorrow is closed
+                openingHoursBusiness.preorderDay = tomorrowDayString;
+                //Adding shopping phrases for nextday
+                if("it" === locale){
+                    openingHoursBusiness.orderReadyPhrase = tomorrowDayString + ' alle ' + correctNextChange.getHours() + ":" + correctNextChange.getMinutes();
+                }
             }
 
             businessNextChange = (state ? 'chiude ' : 'apre ') + tomorrowDayString + ' alle ' + nextchange.getHours() + ":" + nextchange.getMinutes();
@@ -138,13 +143,13 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
         //Added telling user when he will be able to preorder
         if(!today.is_open && !tomorrow.is_open) {
             if("it" === locale) {
-			    if(nextchange){
-					openingHoursBusiness.nextPreorder = getCorrectDayName((nextchange.getDay() == 0 ? 6 : nextchange.getDay() -1),"it");
-				}else {
-					if("it" === locale){
-						openingHoursBusiness.nextPreorder = "mai";
-					}
-				}
+                if(nextchange){
+                    openingHoursBusiness.nextPreorder = getCorrectDayName((nextchange.getDay() == 0 ? 6 : nextchange.getDay() -1),"it");
+                }else {
+                    if("it" === locale){
+                        openingHoursBusiness.nextPreorder = "mai";
+                    }
+                }
             }
         }
 
