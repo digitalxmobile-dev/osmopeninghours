@@ -1,8 +1,50 @@
 /**
- * ver. 0.2.0 19/07/2016.
+ * ver. 0.3.0 03/08/2016.
  */
 
 var opening_hours = require('opening_hours');
+var moment = require('moment');
+var TAG = "OpeningHoursParser";
+
+function setBusinessReadyPhraseAndPreorderDay (locale, correctMomentDate, openingHoursBusiness, state){
+    
+    var diff = moment().diff(correctMomentDate, 'days'); //diff actually is the diff between 2 dates in days
+
+    var nextPreorderDayString = getNextPreorderDayString(locale, diff);
+
+    if(!nextPreorderDayString){
+        //means is not today or tomorrow...
+        nextPreorderDayString = getCorrectDayName(correctMomentDate.day(),locale);
+        openingHoursBusiness.preorderDay = nextPreorderDayString;
+    }
+
+    openingHoursBusiness.orderReadyPhrase = nextPreorderDayString + ' alle ' + correctMomentDate.format("hh:mm");
+    openingHoursBusiness.nextChange = (state ? 'chiude ' : 'apre ') + openingHoursBusiness.orderReadyPhrase;
+}
+
+/**
+ * Returning today or tomorrow based on the diff (difference between 2 dates in days) param, null if is other day
+ *
+ * @param  {String} locale
+ * @param  {int} diff
+ * @return {String} today, tomorrow or null
+ */
+function getNextPreorderDayString (locale, diff) {
+    if(diff === 0){
+        //Is today
+        if(locale == 'it'){
+            return "oggi";
+        }
+    }else if(diff === 1){
+        //Is tomorrow
+        if(locale == 'it'){
+            return "domani";
+        }
+    }else {
+        //Is other day
+        return null;
+    }
+}
 
 /**
  * Parsing OSM string usin opening_hours.js, and getting custom informations
@@ -17,7 +59,7 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
     //Checking for correct input data 
     if ((typeof osmString === 'string' || osmString instanceof String) && isInt(shippingTime) && (typeof locale === 'string' || locale instanceof String ) && locale.length <=2){
 
-        //Check if we are able to parse the string
+        //Check if we are able to parse the string coming from input
         try {
             var oh = new opening_hours(osmString);
         }catch (e){
@@ -32,56 +74,19 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
 
         /**
          * Getting when's the business next change, means when it closes or opens next time
+         * Added try catch for exceptions
          * */
-        var nextchange = oh.getNextChange();
-        var correctNextChange = new Date();
-        if(nextchange){
-            correctNextChange.setHours(nextchange.getHours(), formatNumber(nextchange.getMinutes() + shippingTime), nextchange.getSeconds());
+        try {
+            var nextchange = oh.getNextChange();
+
+            var nextChangeMoment = moment(nextchange).add(shippingTime, "m");
+
+            setBusinessReadyPhraseAndPreorderDay(locale, nextChangeMoment, openingHoursBusiness, state); //Setting properties
+
+        }catch (e) {
+            console.log(TAG + " - " + e);
+            return null;
         }
-
-
-        var businessNextChange;
-
-        if (typeof nextchange === 'undefined') {
-            //businessNextChange = "mai";
-            businessNextChange = 'Non ' + (state ? 'chiude' : 'apre') + " mai."
-        } else {
-            //businessNextChange = nextchange.getHours() + ":" + nextchange.getMinutes();
-            var tomorrowDayString = "";
-            var nowDate = new Date();
-            if(correctNextChange.getDay() == nowDate.getDay()){
-                //Business open or close same day
-                if("it" === locale) {
-                    tomorrowDayString = "oggi";
-                    //Adding shopping phrases for today
-                    if(!state) {
-                        openingHoursBusiness.orderReadyPhrase = 'oggi alle ' + correctNextChange.getHours() + ":" + correctNextChange.getMinutes();
-                    }
-                }
-            }else if(correctNextChange.getDay() > nowDate.getDay() && (correctNextChange.getDay() - nowDate.getDay() == 1)){
-                //In this case means that next business open is "tomorrow"
-                if("it" === locale){
-                    tomorrowDayString = "domani";
-                    //Adding shopping phrases for tomorrow
-                    openingHoursBusiness.orderReadyPhrase = 'domani alle ' + correctNextChange.getHours() + ":" + correctNextChange.getMinutes();
-                }
-            }else {
-                //Search wich day business opens, coz is not tomorrow
-                tomorrowDayString = getCorrectDayName(correctNextChange.getDay(),locale);
-                //Adding in a custom property of returning obj, with the next open day today and tomorrow is closed
-                openingHoursBusiness.preorderDay = tomorrowDayString;
-                //Adding shopping phrases for nextday
-                if("it" === locale){
-                    openingHoursBusiness.orderReadyPhrase = tomorrowDayString + ' alle ' + correctNextChange.getHours() + ":" + correctNextChange.getMinutes();
-                }
-            }
-
-            businessNextChange = (state ? 'chiude ' : 'apre ') + tomorrowDayString + ' alle ' + nextchange.getHours() + ":" + nextchange.getMinutes();
-        }
-
-
-        openingHoursBusiness.nextChange = businessNextChange;//Representing chiude/apre alle hh:mm
-        //openingHoursBusiness.nextChangeHours = businessNextChangeHoursMinutes(nextchange); //Commented for now, future uses
 
         /**
          * Getting today and tomorrow custom objects
@@ -156,6 +161,7 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
         return openingHoursBusiness;
 
     }else {
+        //EXCEPTIONS!
         return null;
     }
 };
