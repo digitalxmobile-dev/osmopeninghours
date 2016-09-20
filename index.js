@@ -1,25 +1,31 @@
 /**
- * ver. 0.3.0 03/08/2016.
+ * ver. 0.4.0 20/09/2016.
  */
 
 var opening_hours = require('opening_hours');
 var moment = require('moment');
 var TAG = "OpeningHoursParser";
 
-function setBusinessReadyPhraseAndPreorderDay (locale, correctMomentDate, openingHoursBusiness, state){
-    
-    var diff = moment().diff(correctMomentDate, 'days'); //diff actually is the diff between 2 dates in days
+function setBusinessReadyPhraseAndPreorderDay (locale, nextChangeMoment, shippingTime, openingHoursBusiness, isOpen){
 
-    var nextPreorderDayString = getNextPreorderDayString(locale, diff);
+    var nextChangeMomentClone = moment(nextChangeMoment);
 
-    if(!nextPreorderDayString){
-        //means is not today or tomorrow...
-        nextPreorderDayString = getCorrectDayName(correctMomentDate.day(),locale);
+    if (!isOpen) {
+        //if is close --> get next available window to perform a order
+        var todayDay = moment().format('D');
+        var nextChangeDay = nextChangeMoment.format('D');
+        var diff = nextChangeDay - todayDay;
+        var nextPreorderDayString = getNextPreorderDayString(locale, diff, nextChangeMomentClone.day());
         openingHoursBusiness.preorderDay = nextPreorderDayString;
+        openingHoursBusiness.orderReadyPhrase = nextPreorderDayString + ' dalle ' + nextChangeMomentClone.add(shippingTime, 'm').format("HH:mm", locale);
+    }
+    else {
+        openingHoursBusiness.preorderDay = "-";
+        openingHoursBusiness.orderReadyPhrase = "-";
     }
 
-    openingHoursBusiness.orderReadyPhrase = nextPreorderDayString + ' alle ' + correctMomentDate.format("hh:mm");
-    openingHoursBusiness.nextChange = (state ? 'chiude ' : 'apre ') + openingHoursBusiness.orderReadyPhrase;
+    //next open-close
+    openingHoursBusiness.nextChange = (isOpen ? 'chiude' : 'apre') + ' alle ' + nextChangeMoment.format("HH:mm", locale);
 }
 
 /**
@@ -29,7 +35,7 @@ function setBusinessReadyPhraseAndPreorderDay (locale, correctMomentDate, openin
  * @param  {int} diff
  * @return {String} today, tomorrow or null
  */
-function getNextPreorderDayString (locale, diff) {
+function getNextPreorderDayString (locale, diff, day) {
     if(diff === 0){
         //Is today
         if(locale == 'it'){
@@ -42,7 +48,7 @@ function getNextPreorderDayString (locale, diff) {
         }
     }else {
         //Is other day
-        return null;
+        return getCorrectDayName(day,locale);
     }
 }
 
@@ -78,10 +84,9 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
          * */
         try {
             var nextchange = oh.getNextChange();
+            var nextChangeMoment = moment(nextchange);
 
-            var nextChangeMoment = moment(nextchange).add(shippingTime, "m");
-
-            setBusinessReadyPhraseAndPreorderDay(locale, nextChangeMoment, openingHoursBusiness, state); //Setting properties
+            setBusinessReadyPhraseAndPreorderDay(locale, nextChangeMoment, shippingTime, openingHoursBusiness, state);
 
         }catch (e) {
             console.log(TAG + " - " + e);
@@ -201,7 +206,7 @@ function getDayIntervals(day, oh, shippingTime) {
     var to = new Date();
 
     if("today" === day) {
-        from.setHours(from.getHours(), formatNumber(from.getMinutes() + shippingTime), from.getSeconds());
+        from.setHours(from.getHours(), from.getMinutes(), from.getSeconds());
         to.setHours(23, 59, 59);
     }else if("tomorrow" === day){
         from.setDate(from.getDate() + 1);
@@ -221,7 +226,7 @@ function getDayIntervals(day, oh, shippingTime) {
  * @param  {int} shippingTime
  * @return {Array} buildedIntervalList
  */
-function buildDayIntervals(intervalList,shippingTime) {
+function buildDayIntervals(intervalList, shippingTime) {
 
     var buildedIntervalList = [];
 
@@ -229,6 +234,7 @@ function buildDayIntervals(intervalList,shippingTime) {
         for(var i=0; i<intervalList.length; i++) {
             var buildedInterval = {};
             var actual = intervalList[i];
+            actual[0].setHours(actual[0].getHours(),(actual[0].getMinutes() + shippingTime),actual[0].getSeconds());
             var openMinutes = formatNumber(actual[0].getMinutes());
             actual[1].setHours(actual[1].getHours(),(actual[1].getMinutes() - shippingTime),actual[1].getSeconds());
             var closeMinutes = actual[1].getMinutes();
