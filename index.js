@@ -19,14 +19,15 @@ function setBusinessReadyPhraseAndPreorderDay (locale, nextChangeMoment, shippin
         var nextPreorderDayString = getNextPreorderDayString(locale, diff, nextChangeMomentClone.day());
         openingHoursBusiness.preorderDay = nextPreorderDayString;
         openingHoursBusiness.orderReadyPhrase = nextPreorderDayString + ' dalle ' + nextChangeMomentClone.add(shippingTime, 'm').format("HH:mm", locale);
+        //next open-close
+        openingHoursBusiness.nextChange = (isOpen ? 'chiude' : 'apre') + ' ' + nextPreorderDayString  + ' alle ' + nextChangeMoment.format("HH:mm", locale);
     }
     else {
         openingHoursBusiness.preorderDay = "-";
         openingHoursBusiness.orderReadyPhrase = "-";
+        //next open-close
+        openingHoursBusiness.nextChange = (isOpen ? 'chiude' : 'apre') + ' alle ' + nextChangeMoment.format("HH:mm", locale);
     }
-
-    //next open-close
-    openingHoursBusiness.nextChange = (isOpen ? 'chiude' : 'apre') + ' alle ' + nextChangeMoment.format("HH:mm", locale);
 }
 
 /**
