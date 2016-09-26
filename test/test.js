@@ -2,6 +2,10 @@ var assert = require("assert"); // node.js core module
 var openinghours = require('../index.js');  // our module
 var expect    = require("chai").expect; //chai expect module
 
+var osmString = "Mo 09:00-16:00; Tu-Su 09:00-20:00";
+var shippingTime = 20;
+var locale = "it";
+
 describe('OpeningHours - Tests', function(){
   describe('Methods Checking', function(){
     it('should have a getBusinessOpeningHours Method', function(){
@@ -21,8 +25,8 @@ describe('OpeningHours - Tests', function(){
     })    
   }),
   describe('Handling response', function(){
-    var responseObj = openinghours.getBusinessOpeningHours('Mo-Su 8:30-12:30,13:30-17:30', 20, 'it');
-    it ('(Mo-Fr 8:30-12:30,13:30-17:30,10,it) should NOT return null', function() {
+    var responseObj = openinghours.getBusinessOpeningHours(osmString, shippingTime, locale);
+    it ('('+osmString+', '+shippingTime+', '+locale+') should NOT return null', function() {
         assert.equal(typeof responseObj, 'object');
     }),                      
     it ('response.is_now_open must be a boolean', function() {
@@ -51,7 +55,7 @@ describe('OpeningHours - Tests', function(){
     })     
   }),
   describe('Handling response internal objects', function(){
-    var responseObj = openinghours.getBusinessOpeningHours('Th-Su 8:30-12:30,13:30-15:30', 10, 'it');
+    var responseObj = openinghours.getBusinessOpeningHours(osmString, shippingTime, locale);
     it ('today.intervals[0].open must be String', function() {
         if (responseObj.today.intervals) {
             assert.equal(typeof responseObj.today.intervals[0].open, 'string');

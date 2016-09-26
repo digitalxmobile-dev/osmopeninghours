@@ -1,9 +1,10 @@
 /**
- * ver. 0.4.0 20/09/2016.
+ * ver. 0.5.0 20/09/2016.
  */
 
 var opening_hours = require('opening_hours');
 var moment = require('moment');
+var moment_timezone = require('moment-timezone');
 var TAG = "OpeningHoursParser";
 
 function setBusinessReadyPhraseAndPreorderDay (locale, nextChangeMoment, shippingTime, openingHoursBusiness, isOpen){
@@ -73,17 +74,18 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
         }
 
         var openingHoursBusiness = {};
+        var offsetDate = new Date(moment_timezone.tz('Europe/Rome').format());
 
         //Getting business current status, open or close in this moment (not passing a Date to getState())
-        var state = oh.getState(); // we use current date
-        openingHoursBusiness.is_now_open = oh.getState(); //Set timer or preorder view
+        var state = oh.getState(offsetDate); // we use current date
+        openingHoursBusiness.is_now_open = state; //Set timer or preorder view
 
         /**
          * Getting when's the business next change, means when it closes or opens next time
          * Added try catch for exceptions
          * */
         try {
-            var nextchange = oh.getNextChange();
+            var nextchange = oh.getNextChange(offsetDate);
             var nextChangeMoment = moment(nextchange);
 
             setBusinessReadyPhraseAndPreorderDay(locale, nextChangeMoment, shippingTime, openingHoursBusiness, state);
