@@ -1,5 +1,5 @@
 /**
- * ver. 0.5.0 20/09/2016.
+ * ver. 0.5.1 27/09/2016.
  */
 
 var opening_hours = require('opening_hours');
@@ -205,8 +205,10 @@ function getDayIntervalsString (dayIntervals) {
  */
 function getDayIntervals(day, oh, shippingTime) {
 
-    var from = new Date();
-    var to = new Date();
+    var offsetDate = moment_timezone.tz('Europe/Rome');
+    //The 2 dates below was based on server local time...
+    var from = new Date(offsetDate.years(), offsetDate.months(), offsetDate.date(), offsetDate.hours(), offsetDate.minutes());
+    var to = new Date(from);
 
     if("today" === day) {
         from.setHours(from.getHours(), from.getMinutes(), from.getSeconds());
@@ -245,12 +247,20 @@ function buildDayIntervals(intervalList, shippingTime) {
             var closeHours = actual[1].getHours();
             buildedInterval.open = (openHours < 10 ? "0"+openHours : openHours) + ":" + (openMinutes < 10 ? "0"+openMinutes : openMinutes); //[i][0] -> Getting open
             buildedInterval.close = (closeHours < 10 ? "0"+closeHours : closeHours) + ":" + (closeMinutes < 10 ? "0"+closeMinutes : closeMinutes); //[i][1] -> Getting close
+            //Checking if open is > close
+            var checkOpen = moment(buildedInterval.open,"HH:mm");
+            var checkClose = moment(buildedInterval.close,"HH:mm");
+            if(checkOpen > checkClose){
+                buildedInterval.open = buildedInterval.close;
+            }
+
             buildedIntervalList.push(buildedInterval);
         }
     }
 
     return buildedIntervalList;
 }
+
 
 /**
  * Formatting minutes of time 10-20-30-40 etc
