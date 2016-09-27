@@ -21,7 +21,7 @@
   "homepage": "https://github.com/digitalxmobile-dev/osmopeninghours#readme",
   "dependencies": {
   	"moment": "^2.14.1",
-    "moment-timezone" : "^3.9.5",
+    "moment-timezone" : "^0.5.5",
     "opening_hours": "^3.4.0"
   },
   "devDependencies": {
