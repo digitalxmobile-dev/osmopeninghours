@@ -1,5 +1,5 @@
 /**
- * ver. 0.5.1 27/09/2016.
+ * ver. 0.5.2 28/09/2016.
  */
 
 var opening_hours = require('opening_hours');
@@ -54,6 +54,11 @@ function getNextPreorderDayString (locale, diff, day) {
     }
 }
 
+//Added helper function
+function addMinutes(date, minutes) {
+    return new Date(date.getTime() + minutes*60000);
+}
+
 /**
  * Parsing OSM string usin opening_hours.js, and getting custom informations
  *
@@ -74,11 +79,15 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
             return null;
         }
 
+        //FIXME: BROKES UP!
+        //formatNumber(59);
+
         var openingHoursBusiness = {};
         var offsetDate = new Date(moment_timezone.tz('Europe/Rome').format());
+        var offsetDateForNowOpen = addMinutes(offsetDate, shippingTime); //Adding shipping time for check if now is open
 
         //Getting business current status, open or close in this moment (not passing a Date to getState())
-        var state = oh.getState(offsetDate); // we use current date
+        var state = oh.getState(offsetDateForNowOpen); // we use current date
         openingHoursBusiness.is_now_open = state; //Set timer or preorder view
 
         /**
@@ -86,7 +95,8 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
          * Added try catch for exceptions
          * */
         try {
-            var nextchange = oh.getNextChange(offsetDate);
+            //if now is 9:16 and it closes at 9:30 next change will be 9:30 so is WRONG, we must pass here the new offsetDate
+            var nextchange = oh.getNextChange(offsetDateForNowOpen);
             var nextChangeMoment = moment(nextchange);
 
             setBusinessReadyPhraseAndPreorderDay(locale, nextChangeMoment, shippingTime, openingHoursBusiness, state);
@@ -118,7 +128,7 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
         tomorrowToDate.setDate(todayToDate.getDate() + 1);
         tomorrowToDate.setHours(23,59,59);
 
-        var todayIntervalsForOpen = oh.getOpenIntervals(todayFromDate, todayToDate);
+        var todayIntervalsForOpen = oh.getOpenIntervals(offsetDateForNowOpen, todayToDate);
         var tomorrowIntervalsForOpen = oh.getOpenIntervals(tomorrowFromDate, tomorrowToDate);
 
         //Setting if today and tomorrow businsess is open (not checking at current time but general day)
@@ -207,7 +217,7 @@ function getDayIntervals(day, oh, shippingTime) {
 
     var offsetDate = moment_timezone.tz('Europe/Rome');
     //The 2 dates below was based on server local time...
-    var from = new Date(offsetDate.years(), offsetDate.months(), offsetDate.date(), offsetDate.hours(), offsetDate.minutes());
+    var from = addMinutes(new Date(offsetDate.years(), offsetDate.months(), offsetDate.date(), offsetDate.hours(), offsetDate.minutes()),shippingTime);
     var to = new Date(from);
 
     if("today" === day) {
