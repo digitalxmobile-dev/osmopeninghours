@@ -255,6 +255,14 @@ function buildDayIntervals(intervalList, shippingTime) {
             var closeMinutes = actual[1].getMinutes();
             var openHours = actual[0].getHours();
             var closeHours = actual[1].getHours();
+            //check for minutes edges
+            if (openMinutes == 60) {
+                openMinutes = 0;
+                openHours++;
+                if (openHours == 25)
+                    openHours = 1;
+            }
+
             buildedInterval.open = (openHours < 10 ? "0"+openHours : openHours) + ":" + (openMinutes < 10 ? "0"+openMinutes : openMinutes); //[i][0] -> Getting open
             buildedInterval.close = (closeHours < 10 ? "0"+closeHours : closeHours) + ":" + (closeMinutes < 10 ? "0"+closeMinutes : closeMinutes); //[i][1] -> Getting close
             //Checking if open is > close

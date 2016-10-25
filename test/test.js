@@ -2,7 +2,7 @@ var assert = require("assert"); // node.js core module
 var openinghours = require('../index.js');  // our module
 var expect    = require("chai").expect; //chai expect module
 
-var osmString = "Mo 18:00-22:00; Tu-Su 09:00-20:00";
+var osmString = "Mo 18:00-22:00; Tu-Su 13:00-16:00,";
 var shippingTime = 20;
 var locale = "it";
 
