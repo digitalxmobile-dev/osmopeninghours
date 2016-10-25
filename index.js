@@ -1,5 +1,5 @@
 /**
- * ver. 0.5.2 28/09/2016.
+ * ver. 0.6.0 25/10/2016.
  */
 
 var opening_hours = require('opening_hours');
@@ -82,17 +82,31 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
         //FIXME: BROKES UP!
         //formatNumber(59);
 
+        //Fixme new working
         var openingHoursBusiness = {};
-        var offsetDate = new Date(moment_timezone.tz('Europe/Rome').format());
-        var offsetDateForNowOpen = addMinutes(offsetDate, shippingTime); //Adding shipping time for check if now is open
+
+        var offsetDate = moment_timezone.tz('Europe/Rome');
+        //var offsetDateForNowOpen = addMinutes(new Date(offsetDate.years(), offsetDate.months(), offsetDate.date(), offsetDate.hours(), offsetDate.minutes()),0); //shippingTime
+        var offsetDateForNowOpen = new Date(offsetDate.years(), offsetDate.months(), offsetDate.date(), offsetDate.hours(), offsetDate.minutes());
+
+        //Fixme old not working
+        //var offsetDate = new Date(moment_timezone.tz('Europe/Rome').format());
+        //var offsetDateForNowOpen = addMinutes(offsetDate, shippingTime); //Adding shipping time for check if now is open
 
         //Getting business current status, open or close in this moment (not passing a Date to getState())
         var state = oh.getState(offsetDateForNowOpen); // we use current date
+        //FIXME TEST AREA
+        if(state) {
+            //Means is open
+            offsetDateForNowOpen = addMinutes(offsetDateForNowOpen, shippingTime);
+            state = oh.getState(offsetDateForNowOpen);
+        }
         openingHoursBusiness.is_now_open = state; //Set timer or preorder view
 
         /**
          * Getting when's the business next change, means when it closes or opens next time
          * Added try catch for exceptions
+         * 
          * */
         try {
             //if now is 9:16 and it closes at 9:30 next change will be 9:30 so is WRONG, we must pass here the new offsetDate
@@ -217,7 +231,8 @@ function getDayIntervals(day, oh, shippingTime) {
 
     var offsetDate = moment_timezone.tz('Europe/Rome');
     //The 2 dates below was based on server local time...
-    var from = addMinutes(new Date(offsetDate.years(), offsetDate.months(), offsetDate.date(), offsetDate.hours(), offsetDate.minutes()),shippingTime);
+    //Fixme was addMinutes (, shippingtime);
+    var from = new Date(offsetDate.years(), offsetDate.months(), offsetDate.date(), offsetDate.hours(), offsetDate.minutes());
     var to = new Date(from);
 
     if("today" === day) {
