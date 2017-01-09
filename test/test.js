@@ -2,10 +2,10 @@ var assert = require("assert"); // node.js core module
 var openinghours = require('../index.js');  // our module
 var expect    = require("chai").expect; //chai expect module
 
-var osmString = "Mo 18:00-22:00; Tu-Su 13:00-16:00,";
-var shippingTime = 20;
+var osmString = "Mo 18:00-24:00; Tu-Su 13:00-16:00,";
+var shippingTime = 120;
 var locale = "it";
-var is_order_only_tomorrow = true;
+var is_order_only_tomorrow = false;
 
 describe('OpeningHours - Tests', function(){
   describe('Methods Checking', function(){
@@ -41,19 +41,7 @@ describe('OpeningHours - Tests', function(){
     }),
     it ('response.tomorrow must be a Object', function() {
         assert.equal(typeof responseObj.tomorrow, 'object');
-    }),
-    it ('response.today.intervals must not be empty', function() {
-        expect(responseObj.today.intervals).not.to.be.empty;
-    }),
-    it ('response.tomorrow.intervals must not be empty', function() {
-        expect(responseObj.tomorrow.intervals).not.to.be.empty;
-    }),
-    it ('response.today.intervalsString must not be empty', function() {
-        expect(responseObj.today.intervalsString).not.to.be.empty;
-    }),
-    it ('response.tomorrow.intervalsString must not be empty', function() {
-        expect(responseObj.tomorrow.intervalsString).not.to.be.empty;
-    })     
+    })
   }),
   describe('Handling response internal objects', function(){
     var responseObj = openinghours.getBusinessOpeningHours(osmString, shippingTime, locale, is_order_only_tomorrow);
@@ -71,22 +59,7 @@ describe('OpeningHours - Tests', function(){
         if (responseObj.tomorrow.intervals) {
             assert.equal(typeof responseObj.tomorrow.intervals[0].open, 'string');
         }
-    }),
-    it ('tomorrow.intervals[0].close must be String', function() {
-        if (responseObj.tomorrow.intervals) {
-            assert.equal(typeof responseObj.tomorrow.intervals[0].close, 'string');
-        }
-    }),
-    it ('today.intervalsString[0] must be String', function() {
-        if (responseObj.tomorrow.intervalsString) {
-            assert.equal(typeof responseObj.today.intervalsString[0], 'string');
-        }
-    }),
-    it ('tomorrow.intervalsString[0] must be String', function() {
-        if (responseObj.tomorrow.intervalsString) {
-            assert.equal(typeof responseObj.tomorrow.intervalsString[0], 'string');
-        }
-    })        
+    })
   }),
   describe('Checking all days close',function(){
     var responseObj = openinghours.getBusinessOpeningHours('Mo-Su off', 10, 'it', true);
