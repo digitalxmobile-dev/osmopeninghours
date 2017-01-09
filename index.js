@@ -69,6 +69,8 @@ function addMinutes(date, minutes) {
  */
 exports.getBusinessOpeningHours = function (osmString, shippingTime, locale, is_orders_only_tomorrow) {
 
+    console.log('---- OSM parser ---- ', osmString, shippingTime, locale, is_orders_only_tomorrow);
+
     //Checking for correct input data 
     if ((typeof osmString === 'string' || osmString instanceof String) && isInt(shippingTime) && (typeof locale === 'string' || locale instanceof String ) && locale.length <=2){
 
