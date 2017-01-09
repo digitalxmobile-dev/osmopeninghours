@@ -5,6 +5,7 @@ var expect    = require("chai").expect; //chai expect module
 var osmString = "Mo 18:00-22:00; Tu-Su 13:00-16:00,";
 var shippingTime = 20;
 var locale = "it";
+var is_order_only_tomorrow = true;
 
 describe('OpeningHours - Tests', function(){
   describe('Methods Checking', function(){
@@ -25,7 +26,7 @@ describe('OpeningHours - Tests', function(){
     })    
   }),
   describe('Handling response', function(){
-    var responseObj = openinghours.getBusinessOpeningHours(osmString, shippingTime, locale);
+    var responseObj = openinghours.getBusinessOpeningHours(osmString, shippingTime, locale, is_order_only_tomorrow);
     it ('('+osmString+', '+shippingTime+', '+locale+') should NOT return null', function() {
         assert.equal(typeof responseObj, 'object');
     }),                      
@@ -55,7 +56,7 @@ describe('OpeningHours - Tests', function(){
     })     
   }),
   describe('Handling response internal objects', function(){
-    var responseObj = openinghours.getBusinessOpeningHours(osmString, shippingTime, locale);
+    var responseObj = openinghours.getBusinessOpeningHours(osmString, shippingTime, locale, is_order_only_tomorrow);
     it ('today.intervals[0].open must be String', function() {
         if (responseObj.today.intervals) {
             assert.equal(typeof responseObj.today.intervals[0].open, 'string');
@@ -88,7 +89,7 @@ describe('OpeningHours - Tests', function(){
     })        
   }),
   describe('Checking all days close',function(){
-    var responseObj = openinghours.getBusinessOpeningHours('Mo-Su off', 10, 'it');  
+    var responseObj = openinghours.getBusinessOpeningHours('Mo-Su off', 10, 'it', true);
     it ('today.intervals[0].open must be String', function() {
         assert.equal(typeof responseObj.today.intervals, 'undefined');
     })

@@ -67,7 +67,7 @@ function addMinutes(date, minutes) {
  * @param {String} locale
  * @return {Object} openingHoursBusiness
  */
-exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
+exports.getBusinessOpeningHours = function (osmString, shippingTime, locale, is_orders_only_tomorrow) {
 
     //Checking for correct input data 
     if ((typeof osmString === 'string' || osmString instanceof String) && isInt(shippingTime) && (typeof locale === 'string' || locale instanceof String ) && locale.length <=2){
@@ -146,7 +146,10 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale) {
         var tomorrowIntervalsForOpen = oh.getOpenIntervals(tomorrowFromDate, tomorrowToDate);
 
         //Setting if today and tomorrow businsess is open (not checking at current time but general day)
-        today.is_open = (todayIntervalsForOpen && todayIntervalsForOpen.length > 0);
+        if(is_orders_only_tomorrow)
+            today.is_open = false;
+        else
+            today.is_open = (todayIntervalsForOpen && todayIntervalsForOpen.length > 0);
         tomorrow.is_open = (tomorrowIntervalsForOpen && tomorrowIntervalsForOpen.length > 0);
 
         /**
