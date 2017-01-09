@@ -106,7 +106,7 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale, for
      * */
     //If today is open, need to get today open/close intervals
     if(today.is_open) {
-      var todayIntervals = getDayIntervals("today",oh, shippingTime);
+      var todayIntervals = getDayIntervals("today",oh, shippingTime, state);
       if (todayIntervals && todayIntervals.length > 0) {
         today.intervals = todayIntervals;
         today.intervalsString = getDayIntervalsString(todayIntervals);
@@ -117,7 +117,7 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale, for
 
     //id tomorrow is open, we need to get today and tomorrow intervals
     if(tomorrow.is_open) {
-      var tomorrowIntervals = getDayIntervals("tomorrow",oh, shippingTime);
+      var tomorrowIntervals = getDayIntervals("tomorrow",oh, shippingTime, state);
       if (tomorrowIntervals && tomorrowIntervals.length > 0) {
         tomorrow.intervals = tomorrowIntervals;
         tomorrow.intervalsString = getDayIntervalsString(tomorrowIntervals);
@@ -245,7 +245,7 @@ function isInt(n) {
  * @param  {int} shippingTime
  * @return {Array} intervalsObjects
  */
-function getDayIntervals(day, oh, shippingTime) {
+function getDayIntervals(day, oh, shippingTime, state) {
 
   var offsetDate = moment_timezone.tz('Europe/Rome');
   //The 2 dates below was based on server local time...
@@ -263,7 +263,7 @@ function getDayIntervals(day, oh, shippingTime) {
     to.setHours(23, 59, 59);
   }
 
-  return buildDayIntervals(oh.getOpenIntervals(from, to), shippingTime);
+  return buildDayIntervals(oh.getOpenIntervals(from, to), shippingTime, state);
 
 }
 
@@ -274,7 +274,7 @@ function getDayIntervals(day, oh, shippingTime) {
  * @param  {int} shippingTime
  * @return {Array} buildedIntervalList
  */
-function buildDayIntervals(intervalList, shippingTime) {
+function buildDayIntervals(intervalList, shippingTime, state) {
 
   var buildedIntervalList = [];
 
@@ -282,8 +282,12 @@ function buildDayIntervals(intervalList, shippingTime) {
     for(var i=0; i<intervalList.length; i++) {
       var buildedInterval = {};
       var actual = intervalList[i];
-      actual[0].setHours(actual[0].getHours(),(actual[0].getMinutes() + shippingTime),actual[0].getSeconds());
-      //actual[0].setHours(actual[0].getHours(),(actual[0].getMinutes()),actual[0].getSeconds());
+      //Adding shippingTime only if im able to Order now, means im current range of hours that the business is open
+      if(state){
+        actual[0].setHours(actual[0].getHours(),(actual[0].getMinutes() + shippingTime),actual[0].getSeconds());
+      }else {
+        actual[0].setHours(actual[0].getHours(),(actual[0].getMinutes()),actual[0].getSeconds());
+      }
       var openMinutes = formatNumber(actual[0].getMinutes());
       //actual[1].setHours(actual[1].getHours(),(actual[1].getMinutes() - shippingTime),actual[1].getSeconds());
       actual[1].setHours(actual[1].getHours(),(actual[1].getMinutes()),actual[1].getSeconds());
