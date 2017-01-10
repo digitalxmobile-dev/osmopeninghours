@@ -1,5 +1,5 @@
 /**
- * ver. 2.0.3 10/01/2017.
+ * ver. 2.0.4 10/01/2017.
  */
 
 
@@ -188,7 +188,19 @@ function setBusinessReadyPhraseAndPreorderDay (locale, nextChangeMoment, shippin
   var diff = nextChangeDay - todayDay;
   var nextPreorderDayString = getNextPreorderDayString(locale, diff, nextChangeMomentClone.day());
 
-  if (!isOpen) {
+  openingHoursBusiness.preorderDay = nextPreorderDayString;
+
+  if(openingHoursBusiness.today.is_open){
+    openingHoursBusiness.orderReadyPhrase =  openingHoursBusiness.today.intervals[0].open;
+  }else if(openingHoursBusiness.tomorrow.is_open){
+    openingHoursBusiness.orderReadyPhrase =  openingHoursBusiness.tomorrow.intervals[0].open;
+  }else {
+    openingHoursBusiness.orderReadyPhrase = nextPreorderDayString + ' dalle ' + nextChangeMomentClone.add(shippingTime, 'm').format("HH:mm", locale);
+  }
+  //next open-close
+  openingHoursBusiness.nextChange = (isOpen ? 'chiude' : 'apre') + ' alle ' + nextChangeMoment.format("HH:mm", locale);
+
+  /*if (!isOpen) {
     //if is close --> get next available window to perform a order
     openingHoursBusiness.preorderDay = nextPreorderDayString;
     openingHoursBusiness.orderReadyPhrase = nextPreorderDayString + ' dalle ' + nextChangeMomentClone.add(shippingTime, 'm').format("HH:mm", locale);
@@ -205,7 +217,7 @@ function setBusinessReadyPhraseAndPreorderDay (locale, nextChangeMoment, shippin
     }
     //next open-close
     openingHoursBusiness.nextChange = (isOpen ? 'chiude' : 'apre') + ' alle ' + nextChangeMoment.format("HH:mm", locale);
-  }
+  }*/
 }
 
 /**
