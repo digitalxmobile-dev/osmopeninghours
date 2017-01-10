@@ -1,5 +1,5 @@
 /**
- * ver. 2.0.6 10/01/2017.
+ * ver. 2.0.7 10/01/2017.
  */
 
 
@@ -166,6 +166,10 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale, for
     }catch (e) {
       console.log(TAG + " - " + e);
       return null;
+    }
+
+    if(forceTodayClose){
+      openingHoursBusiness.is_now_open = false;
     }
 
     return openingHoursBusiness;
