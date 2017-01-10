@@ -42,14 +42,14 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale, for
     //Building actualDate as Javascript Object
     var actualJSDate = new Date(actualDate.year(), actualDate.month(), actualDate.date(), actualDate.hours(), actualDate.minutes());
 
+    //Setting actual status to returning Object
+    openingHoursBusiness.is_now_open = oh.getState(actualJSDate);
+
     //Adding shippingtime to actual date
     actualJSDate = addMinutes(actualJSDate, shippingTime);
 
     //Getting business current status, open or close in the actualDate + shippingTime
     var state = oh.getState(actualJSDate);
-
-    //Setting actual status to returning Object
-    openingHoursBusiness.is_now_open = state;
 
     /**
      * Getting when's the business next change, means when it closes or opens next time
@@ -139,6 +139,31 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale, for
             openingHoursBusiness.nextPreorder = "mai";
           }
         }
+      }
+    }
+
+    //Adding a check for remove same interval
+    if(openingHoursBusiness.today && openingHoursBusiness.today.intervals && openingHoursBusiness.today.intervals.length > 0){
+      for (var i=0; i<openingHoursBusiness.today.intervals.length; i++) {
+        var actualIntervalToday = openingHoursBusiness.today.intervals[i];
+        if(actualIntervalToday.open === actualIntervalToday.close){
+          openingHoursBusiness.today.intervals.splice(i,1);
+        }
+      }
+      if(openingHoursBusiness.today.intervals.length === 0){
+        openingHoursBusiness.today.is_open = false;
+      }
+    }
+
+    if(openingHoursBusiness.tomorrow && openingHoursBusiness.tomorrow.intervals && openingHoursBusiness.tomorrow.intervals.length > 0){
+      for (var j=0; j<openingHoursBusiness.tomorrow.intervals.length; j++) {
+        var actualIntervalTomorrow = openingHoursBusiness.tomorrow.intervals[j];
+        if(actualIntervalTomorrow.open === actualIntervalTomorrow.close){
+          openingHoursBusiness.tomorrow.intervals.splice(j,1);
+        }
+      }
+      if(openingHoursBusiness.tomorrow.intervals.length === 0){
+        openingHoursBusiness.tomorrow.is_open = false;
       }
     }
 
@@ -250,7 +275,12 @@ function getDayIntervals(day, oh, shippingTime, state) {
   var offsetDate = moment_timezone.tz('Europe/Rome');
   //The 2 dates below was based on server local time...
   //Fixme was addMinutes (, shippingtime);
-  var from = new Date(offsetDate.years(), offsetDate.months(), offsetDate.date(), offsetDate.hours(), offsetDate.minutes());
+  var from = new Date(offsetDate.year(), offsetDate.month(), offsetDate.date(), offsetDate.hours(), offsetDate.minutes());
+
+  if(day === 'today'){
+    from = addMinutes(from, shippingTime);
+  }
+
   var to = new Date(from);
 
   if("today" === day) {
@@ -263,7 +293,7 @@ function getDayIntervals(day, oh, shippingTime, state) {
     to.setHours(23, 59, 59);
   }
 
-  return buildDayIntervals(oh.getOpenIntervals(from, to), shippingTime, state);
+  return buildDayIntervals(oh.getOpenIntervals(from, to), shippingTime, state, day);
 
 }
 
@@ -274,7 +304,7 @@ function getDayIntervals(day, oh, shippingTime, state) {
  * @param  {int} shippingTime
  * @return {Array} buildedIntervalList
  */
-function buildDayIntervals(intervalList, shippingTime, state) {
+function buildDayIntervals(intervalList, shippingTime, state, day) {
 
   var buildedIntervalList = [];
 
@@ -283,11 +313,21 @@ function buildDayIntervals(intervalList, shippingTime, state) {
       var buildedInterval = {};
       var actual = intervalList[i];
       //Adding shippingTime only if im able to Order now, means im current range of hours that the business is open
-      if(state){
-        actual[0].setHours(actual[0].getHours(),(actual[0].getMinutes() + shippingTime),actual[0].getSeconds());
+      var firstDate = actual [0];
+      var secondDate = actual [1];
+      var actualDate = new Date();
+      if(actualDate > firstDate && actualDate < secondDate){
+        //Add
+        actual[0].setHours(actual[0].getHours(), day === 'today' && i == 0 ? (actual[0].getMinutes() + shippingTime) : (actual[0].getMinutes()),actual[0].getSeconds());
       }else {
+        //Ignore
         actual[0].setHours(actual[0].getHours(),(actual[0].getMinutes()),actual[0].getSeconds());
       }
+      /*if(state){
+        actual[0].setHours(actual[0].getHours(), day === 'today' && i == 0 ? (actual[0].getMinutes() + shippingTime) : (actual[0].getMinutes()),actual[0].getSeconds());
+      }else {
+        actual[0].setHours(actual[0].getHours(),(actual[0].getMinutes()),actual[0].getSeconds());
+      }*/
       var openMinutes = formatNumber(actual[0].getMinutes());
       //actual[1].setHours(actual[1].getHours(),(actual[1].getMinutes() - shippingTime),actual[1].getSeconds());
       actual[1].setHours(actual[1].getHours(),(actual[1].getMinutes()),actual[1].getSeconds());
