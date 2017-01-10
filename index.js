@@ -1,5 +1,5 @@
 /**
- * ver. 2.0.4 10/01/2017.
+ * ver. 2.0.5 10/01/2017.
  */
 
 
@@ -191,9 +191,9 @@ function setBusinessReadyPhraseAndPreorderDay (locale, nextChangeMoment, shippin
   openingHoursBusiness.preorderDay = nextPreorderDayString;
 
   if(openingHoursBusiness.today.is_open){
-    openingHoursBusiness.orderReadyPhrase =  openingHoursBusiness.today.intervals[0].open;
+    openingHoursBusiness.orderReadyPhrase = 'oggi dalle ' +  openingHoursBusiness.today.intervals[0].open;
   }else if(openingHoursBusiness.tomorrow.is_open){
-    openingHoursBusiness.orderReadyPhrase =  openingHoursBusiness.tomorrow.intervals[0].open;
+    openingHoursBusiness.orderReadyPhrase = 'domani dalle ' + openingHoursBusiness.tomorrow.intervals[0].open;
   }else {
     openingHoursBusiness.orderReadyPhrase = nextPreorderDayString + ' dalle ' + nextChangeMomentClone.add(shippingTime, 'm').format("HH:mm", locale);
   }
