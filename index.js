@@ -1,5 +1,5 @@
 /**
- * ver. 2.0.5 10/01/2017.
+ * ver. 2.0.6 10/01/2017.
  */
 
 
@@ -43,14 +43,14 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale, for
     var actualJSDate = new Date(actualDate.year(), actualDate.month(), actualDate.date(), actualDate.hours(), actualDate.minutes());
 
     //Setting actual status to returning Object
-    openingHoursBusiness.is_now_open = oh.getState(actualJSDate);
+    //openingHoursBusiness.is_now_open = oh.getState(actualJSDate);
 
     //Adding shippingtime to actual date
     actualJSDate = addMinutes(actualJSDate, shippingTime);
 
     //Getting business current status, open or close in the actualDate + shippingTime
     var state = oh.getState(actualJSDate);
-
+    openingHoursBusiness.is_now_open = state;
     /**
      * Getting today and tomorrow custom objects
      * */
@@ -198,7 +198,7 @@ function setBusinessReadyPhraseAndPreorderDay (locale, nextChangeMoment, shippin
     openingHoursBusiness.orderReadyPhrase = nextPreorderDayString + ' dalle ' + nextChangeMomentClone.add(shippingTime, 'm').format("HH:mm", locale);
   }
   //next open-close
-  openingHoursBusiness.nextChange = (isOpen ? 'chiude' : 'apre') + ' alle ' + nextChangeMoment.format("HH:mm", locale);
+  openingHoursBusiness.nextChange = (isOpen ? 'Puoi ordinare fino alle ' : 'Puoi ordinare dalle ') + nextChangeMoment.format("HH:mm", locale);
 
   /*if (!isOpen) {
     //if is close --> get next available window to perform a order
