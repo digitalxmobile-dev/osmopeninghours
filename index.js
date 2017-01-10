@@ -98,8 +98,9 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale, for
       today.is_open = false;
     }else {
       today.is_open = (todayIntervalsForOpen && todayIntervalsForOpen.length > 0);
-      tomorrow.is_open = (tomorrowIntervalsForOpen && tomorrowIntervalsForOpen.length > 0);
     }
+
+    tomorrow.is_open = (tomorrowIntervalsForOpen && tomorrowIntervalsForOpen.length > 0);
 
     /**
      * Checking if today and tomorrow is open or not, and setting respectively it's intervals of open/close per day.
