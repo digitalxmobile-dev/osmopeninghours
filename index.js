@@ -1,5 +1,5 @@
 /**
- * ver. 2.0.02 10/01/2017.
+ * ver. 2.0.3 10/01/2017.
  */
 
 
@@ -50,23 +50,6 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale, for
 
     //Getting business current status, open or close in the actualDate + shippingTime
     var state = oh.getState(actualJSDate);
-
-    /**
-     * Getting when's the business next change, means when it closes or opens next time
-     * Added try catch for exceptions
-     *
-     * */
-    try {
-      //if now is 9:16 and it closes at 9:30 next change will be 9:30 so is WRONG, we must pass here the new offsetDate
-      var nextChange = oh.getNextChange(actualJSDate);
-      var nextChangeMoment = moment(nextChange);
-
-      setBusinessReadyPhraseAndPreorderDay(locale, nextChangeMoment, shippingTime, openingHoursBusiness, state);
-
-    }catch (e) {
-      console.log(TAG + " - " + e);
-      return null;
-    }
 
     /**
      * Getting today and tomorrow custom objects
@@ -168,6 +151,23 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale, for
       }
     }
 
+    /**
+     * Getting when's the business next change, means when it closes or opens next time
+     * Added try catch for exceptions
+     *
+     * */
+    try {
+      //if now is 9:16 and it closes at 9:30 next change will be 9:30 so is WRONG, we must pass here the new offsetDate
+      var nextChange = oh.getNextChange(actualJSDate);
+      var nextChangeMoment = moment(nextChange);
+
+      setBusinessReadyPhraseAndPreorderDay(locale, nextChangeMoment, shippingTime, openingHoursBusiness, state);
+
+    }catch (e) {
+      console.log(TAG + " - " + e);
+      return null;
+    }
+
     return openingHoursBusiness;
 
   }else {
@@ -186,20 +186,23 @@ function setBusinessReadyPhraseAndPreorderDay (locale, nextChangeMoment, shippin
   var todayDay = moment().format('D');
   var nextChangeDay = nextChangeMoment.format('D');
   var diff = nextChangeDay - todayDay;
+  var nextPreorderDayString = getNextPreorderDayString(locale, diff, nextChangeMomentClone.day());
 
   if (!isOpen) {
     //if is close --> get next available window to perform a order
-    var nextPreorderDayString = getNextPreorderDayString(locale, diff, nextChangeMomentClone.day());
     openingHoursBusiness.preorderDay = nextPreorderDayString;
     openingHoursBusiness.orderReadyPhrase = nextPreorderDayString + ' dalle ' + nextChangeMomentClone.add(shippingTime, 'm').format("HH:mm", locale);
     //next open-close
     openingHoursBusiness.nextChange = (isOpen ? 'chiude' : 'apre') + ' ' + nextPreorderDayString  + ' alle ' + nextChangeMoment.format("HH:mm", locale);
-  }
-  else {
-
-    var nextPreorderDayString = getNextPreorderDayString(locale, diff, nextChangeMomentClone.day());
+  } else {
     openingHoursBusiness.preorderDay = "-";
-    openingHoursBusiness.orderReadyPhrase = nextPreorderDayString  + ' dalle ' + nextChangeMoment.format("HH:mm", locale);
+    if(openingHoursBusiness.today.is_open){
+      openingHoursBusiness.orderReadyPhrase =  openingHoursBusiness.today.intervals[0].open;
+    }else if(openingHoursBusiness.tomorrow.is_open){
+      openingHoursBusiness.orderReadyPhrase =  openingHoursBusiness.tomorrow.intervals[0].open;
+    }else {
+      openingHoursBusiness.orderReadyPhrase = '-';
+    }
     //next open-close
     openingHoursBusiness.nextChange = (isOpen ? 'chiude' : 'apre') + ' alle ' + nextChangeMoment.format("HH:mm", locale);
   }
