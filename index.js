@@ -1,5 +1,5 @@
 /**
- * ver. 2.0.7 10/01/2017.
+ * ver. 2.0.8 10/01/2017.
  */
 
 
@@ -202,7 +202,7 @@ function setBusinessReadyPhraseAndPreorderDay (locale, nextChangeMoment, shippin
     openingHoursBusiness.orderReadyPhrase = nextPreorderDayString + ' dalle ' + nextChangeMomentClone.add(shippingTime, 'm').format("HH:mm", locale);
   }
   //next open-close
-  openingHoursBusiness.nextChange = (isOpen ? 'Puoi ordinare fino alle ' : 'Puoi ordinare dalle ') + nextChangeMoment.format("HH:mm", locale);
+  openingHoursBusiness.nextChange = 'Puoi ordinare ' + openingHoursBusiness.orderReadyPhrase;
 
   /*if (!isOpen) {
     //if is close --> get next available window to perform a order
