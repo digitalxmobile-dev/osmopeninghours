@@ -1,6 +1,6 @@
 {
   "name": "osmopeninghours",
-  "version": "2.0.1",
+  "version": "2.0.02",
   "description": "No description",
   "main": "index.js",
   "scripts": {

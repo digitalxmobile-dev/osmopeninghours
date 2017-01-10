@@ -1,5 +1,5 @@
 /**
- * ver. 2.0.1 10/01/2017.
+ * ver. 2.0.02 10/01/2017.
  */
 
 
@@ -183,11 +183,12 @@ function setBusinessReadyPhraseAndPreorderDay (locale, nextChangeMoment, shippin
 
   var nextChangeMomentClone = moment(nextChangeMoment);
 
+  var todayDay = moment().format('D');
+  var nextChangeDay = nextChangeMoment.format('D');
+  var diff = nextChangeDay - todayDay;
+
   if (!isOpen) {
     //if is close --> get next available window to perform a order
-    var todayDay = moment().format('D');
-    var nextChangeDay = nextChangeMoment.format('D');
-    var diff = nextChangeDay - todayDay;
     var nextPreorderDayString = getNextPreorderDayString(locale, diff, nextChangeMomentClone.day());
     openingHoursBusiness.preorderDay = nextPreorderDayString;
     openingHoursBusiness.orderReadyPhrase = nextPreorderDayString + ' dalle ' + nextChangeMomentClone.add(shippingTime, 'm').format("HH:mm", locale);
@@ -195,8 +196,10 @@ function setBusinessReadyPhraseAndPreorderDay (locale, nextChangeMoment, shippin
     openingHoursBusiness.nextChange = (isOpen ? 'chiude' : 'apre') + ' ' + nextPreorderDayString  + ' alle ' + nextChangeMoment.format("HH:mm", locale);
   }
   else {
+
+    var nextPreorderDayString = getNextPreorderDayString(locale, diff, nextChangeMomentClone.day());
     openingHoursBusiness.preorderDay = "-";
-    openingHoursBusiness.orderReadyPhrase = "-";
+    openingHoursBusiness.orderReadyPhrase = nextPreorderDayString  + ' dalle ' + nextChangeMoment.format("HH:mm", locale);
     //next open-close
     openingHoursBusiness.nextChange = (isOpen ? 'chiude' : 'apre') + ' alle ' + nextChangeMoment.format("HH:mm", locale);
   }
