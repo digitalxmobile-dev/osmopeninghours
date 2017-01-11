@@ -1,5 +1,5 @@
 /**
- * ver. 2.0.9 10/01/2017.
+ * ver. 2.0.10 11/01/2017.
  */
 
 
@@ -161,7 +161,7 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale, for
       var nextChange = oh.getNextChange(actualJSDate);
       var nextChangeMoment = moment(nextChange);
 
-      setBusinessReadyPhraseAndPreorderDay(locale, nextChangeMoment, shippingTime, openingHoursBusiness, state);
+      setBusinessReadyPhraseAndPreorderDay(locale, nextChangeMoment, shippingTime, openingHoursBusiness, oh);
 
     }catch (e) {
       console.log(TAG + " - " + e);
@@ -183,16 +183,32 @@ exports.getBusinessOpeningHours = function (osmString, shippingTime, locale, for
 /**
  * Setting up strings for preorder or order with hours etc
  * */
-function setBusinessReadyPhraseAndPreorderDay (locale, nextChangeMoment, shippingTime, openingHoursBusiness, isOpen) {
+function setBusinessReadyPhraseAndPreorderDay (locale, nextChangeMoment, shippingTime, openingHoursBusiness, oh) {
 
-  var nextChangeMomentClone = moment(nextChangeMoment);
+  var _nextChangeMoment;
+
+  //FIXME: Added special case
+  if(!openingHoursBusiness.today.is_open && !openingHoursBusiness.tomorrow.is_open) {
+    // TODO: We need to get next change with actual date + 2 days so we'll be able to get the correct day
+    var actualDate = moment_timezone.tz('Europe/Rome').add(2, 'days');
+    //Building actualDate as Javascript Object
+    var JSDate = new Date(actualDate.year(), actualDate.month(), actualDate.date(), 0, 0);
+
+    var nextChange = oh.getNextChange(JSDate);
+    _nextChangeMoment = moment(nextChange);
+  }else {
+    _nextChangeMoment = nextChangeMoment;
+  }
+
+  var nextChangeMomentClone = moment(_nextChangeMoment);
 
   var todayDay = moment().format('D');
-  var nextChangeDay = nextChangeMoment.format('D');
+  var nextChangeDay = _nextChangeMoment.format('D');
   var diff = nextChangeDay - todayDay;
   var nextPreorderDayString = getNextPreorderDayString(locale, diff, nextChangeMomentClone.day());
 
   openingHoursBusiness.preorderDay = nextPreorderDayString;
+
 
   if(openingHoursBusiness.today.is_open){
     openingHoursBusiness.orderReadyPhrase = 'oggi dalle ' +  openingHoursBusiness.today.intervals[0].open;
